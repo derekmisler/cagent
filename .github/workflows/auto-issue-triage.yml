@@ -21,7 +21,7 @@ jobs:
   triage:
     if: github.event.label.name == 'kind/bug'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       HAS_APP_SECRETS: ${{ secrets.CAGENT_REVIEWER_APP_ID != '' }}
 
@@ -30,6 +30,15 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
         with:
           fetch-depth: 1
+
+      - name: Set up Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Pre-download Go modules
+        run: go mod download
 
       - name: Generate GitHub App token
         if: env.HAS_APP_SECRETS == 'true'
@@ -92,7 +101,7 @@ jobs:
           prompt: ${{ steps.prompt.outputs.text }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           github-token: ${{ steps.app-token.outputs.token || github.token }}
-          timeout: 600
+          timeout: 1800
 
       - name: Parse agent result
         id: result

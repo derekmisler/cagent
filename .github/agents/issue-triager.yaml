@@ -121,9 +121,19 @@ agents:
          - Follow existing code style and conventions
          - Update or add tests if appropriate
 
-      5. **Verify**: Run tests and linting to make sure the fix is correct:
+      5. **Verify**: Run **targeted** tests and linting to make sure the fix is correct.
+         Only test the packages you actually changed — do NOT run the full test suite:
          ```bash
-         task test
+         # Good: test only the changed package(s)
+         go test ./pkg/teamloader/...
+         go test ./pkg/teamloader/... ./pkg/tools/...
+
+         # Bad: this downloads all dependencies and takes too long
+         task test        # runs go test ./...
+         go test ./...    # same problem
+         ```
+         Run linting after tests pass:
+         ```bash
          task lint
          ```
          If tests fail, investigate and fix. Do not leave broken tests.
@@ -134,7 +144,8 @@ agents:
       - Do NOT modify CI/CD configs, workflows, or unrelated files
       - Keep changes minimal — fix the bug, nothing more
       - If you cannot determine a fix with confidence, make no changes and explain why
-      - Always run `task test` and `task lint` before finishing
+      - Always run targeted tests (`go test ./pkg/...`) and `task lint` before finishing
+      - NEVER run `go test ./...` or `task test` — the full test suite takes too long for triage
 
     toolsets:
       - type: filesystem
